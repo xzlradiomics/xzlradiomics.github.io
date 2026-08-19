@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f9efe5">
+  <title>任主任，医师节快乐</title>
+  <style>
+    :root { --green:#174844; --red:#d96550; --gold:#d69b43; --cream:#fffaf3; --text:#315754; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--green); background:linear-gradient(135deg,#f9efe5,#f3e4d4); font-family:Georgia,"Songti SC","Noto Serif SC",serif; }
+    .page { width:min(92%,720px); margin:auto; padding:28px 0 32px; }
+    .date { display:flex; justify-content:space-between; color:var(--text); font:12px/1.5 Arial,"PingFang SC",sans-serif; letter-spacing:.12em; }
+    .card { position:relative; overflow:hidden; margin-top:22px; padding:clamp(36px,9vw,72px) clamp(24px,9vw,72px) 46px; border:1px solid #17484422; border-radius:8px; background:var(--cream); box-shadow:0 18px 45px #765b421c; }
+    .card:after { position:absolute; right:-90px; top:-90px; width:230px; height:230px; border:1px solid #d69b4366; border-radius:50%; content:""; box-shadow:0 0 0 20px #d69b4318,0 0 0 42px #d69b4310; }
+    .label { margin:0 0 18px; color:var(--red); font:bold 13px/1.5 Arial,"PingFang SC",sans-serif; letter-spacing:.2em; }
+    h1 { position:relative; z-index:1; margin:0; font-size:clamp(40px,11vw,78px); line-height:1.1; letter-spacing:.02em; }
+    h1 span { color:var(--red); }
+    .message { margin:28px 0 0; color:var(--text); font-size:clamp(16px,4.5vw,20px); line-height:1.9; }
+    .sign { display:flex; justify-content:space-between; gap:16px; margin-top:42px; padding-top:18px; border-top:1px solid #17484422; font-size:17px; }
+    .sign small { align-self:end; color:var(--text); font:13px/1.5 Arial,"PingFang SC",sans-serif; }
+    .wishes { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
+    .wish { padding:18px 14px; border-top:3px solid var(--gold); background:#fffaf3bb; }
+    .wish b { display:block; margin-bottom:7px; font-size:18px; }
+    .wish small { color:var(--text); font:13px/1.6 Arial,"PingFang SC",sans-serif; }
+    button { width:100%; margin-top:18px; padding:16px; border:0; border-radius:5px; color:#fffaf3; background:var(--green); font:bold 16px Arial,"PingFang SC",sans-serif; }
+    button.done { background:var(--red); }
+    #result { min-height:23px; margin:11px 0 0; color:var(--red); text-align:center; font:13px/1.6 Arial,"PingFang SC",sans-serif; }
+    #fireworks { position:fixed; inset:0; z-index:5; width:100%; height:100%; pointer-events:none; }
+    @media (max-width:520px) { .date { margin:0 4px; font-size:11px; } .wishes { grid-template-columns:1fr; } .wish { padding:15px 16px; } .sign { flex-direction:column; } .sign small { align-self:start; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="date"><b>✦</b><span>8月19日 · 中国医师节</span><span>致敬仁心</span></div>
+    <section class="card">
+      <p class="label">TO REN · WITH RESPECT</p>
+      <h1>任主任<br><span>医师节快乐！</span></h1>
+      <p class="message">以精湛医术守护生命，以温暖仁心抚慰人心。愿您工作有成就，生活有清欢，岁岁安康，事事顺意。</p>
+      <div class="sign"><strong>致敬每一份坚守</strong><small>愿初心如炬，岁岁安康</small></div>
+    </section>
+    <div class="wishes">
+      <div class="wish"><b>仁心常在</b><small>所遇皆温柔，所行皆坦荡。</small></div>
+      <div class="wish"><b>妙手常安</b><small>忙碌有回响，努力被看见。</small></div>
+      <div class="wish"><b>岁月常欢</b><small>愿每一天都值得期待。</small></div>
+    </div>
+    <button id="bless" type="button">点亮这份祝福</button>
+    <p id="result" role="status"></p>
+  </main>
+  <canvas id="fireworks" aria-hidden="true"></canvas>
+  <script>
+    const canvas = document.querySelector("#fireworks");
+    const context = canvas.getContext("2d");
+    let particles = [];
+    let rockets = [];
+    let animationFrame;
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * ratio;
+      canvas.height = window.innerHeight * ratio;
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function burst(x, y, color, shape) {
+      const count = shape === "ring" ? 68 : 92;
+      for (let index = 0; index < count; index += 1) {
+        const angle = (Math.PI * 2 * index) / count;
+        const wave = shape === "flower" ? 1 + Math.sin(angle * 6) * .22 : 1;
+        const speed = (1.7 + Math.random() * 3.8) * wave;
+        particles.push({
+          x, y, vx:Math.cos(angle) * speed, vy:Math.sin(angle) * speed,
+          life:1, size:1.2 + Math.random() * 2.4, color,
+          trail:[]
+        });
+      }
+      for (let index = 0; index < 18; index += 1) {
+        const angle = Math.random() * Math.PI * 2;
+        particles.push({ x, y, vx:Math.cos(angle) * (1 + Math.random() * 2), vy:Math.sin(angle) * (1 + Math.random() * 2), life:1, size:1, color:"#fffaf3", trail:[] });
+      }
+    }
+
+    function launchFirework(x, targetY, color, shape) {
+      rockets.push({ x, y:window.innerHeight + 8, targetY, color, shape, speed:8 + Math.random() * 2, trail:[] });
+    }
+
+    function animateFireworks() {
+      context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      rockets = rockets.filter((rocket) => rocket.y > rocket.targetY);
+      rockets.forEach((rocket) => {
+        rocket.trail.push({ x:rocket.x, y:rocket.y });
+        if (rocket.trail.length > 10) rocket.trail.shift();
+        rocket.y -= rocket.speed;
+        context.beginPath();
+        rocket.trail.forEach((point, index) => index ? context.lineTo(point.x, point.y) : context.moveTo(point.x, point.y));
+        context.strokeStyle = rocket.color;
+        context.lineWidth = 2;
+        context.globalAlpha = .8;
+        context.stroke();
+        context.globalAlpha = 1;
+        if (rocket.y <= rocket.targetY) burst(rocket.x, rocket.targetY, rocket.color, rocket.shape);
+      });
+      particles = particles.filter((particle) => particle.life > 0);
+      particles.forEach((particle) => {
+        particle.trail.push({ x:particle.x, y:particle.y });
+        if (particle.trail.length > 7) particle.trail.shift();
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vx *= .992;
+        particle.vy = particle.vy * .992 + .045;
+        particle.life -= .012;
+        context.beginPath();
+        particle.trail.forEach((point, index) => index ? context.lineTo(point.x, point.y) : context.moveTo(point.x, point.y));
+        context.strokeStyle = particle.color;
+        context.lineWidth = particle.size;
+        context.globalAlpha = Math.max(particle.life, 0);
+        context.stroke();
+        context.fillStyle = particle.color;
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        context.fill();
+      });
+      context.globalAlpha = 1;
+      if (particles.length || rockets.length) animationFrame = requestAnimationFrame(animateFireworks);
+      else { cancelAnimationFrame(animationFrame); context.clearRect(0, 0, window.innerWidth, window.innerHeight); }
+    }
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    document.querySelector("#bless").addEventListener("click", function () {
+      this.classList.add("done");
+      this.textContent = "祝福已送达 · 任主任医师节快乐";
+      document.querySelector("#result").textContent = "愿您被鲜花与掌声环绕，也被每一个平安的明天拥抱。";
+      const fireworks = [
+        [window.innerWidth * .2, window.innerHeight * .28, "#d96550", "flower"],
+        [window.innerWidth * .76, window.innerHeight * .24, "#d69b43", "ring"],
+        [window.innerWidth * .5, window.innerHeight * .17, "#174844", "flower"],
+        [window.innerWidth * .38, window.innerHeight * .34, "#e98a68", "ring"]
+      ];
+      fireworks.forEach(([x, targetY, color, shape], index) => setTimeout(() => {
+        launchFirework(x, targetY, color, shape);
+        cancelAnimationFrame(animationFrame);
+        animateFireworks();
+      }, index * 260));
+      cancelAnimationFrame(animationFrame);
+    });
+  </script>
+</body>
+</html>
